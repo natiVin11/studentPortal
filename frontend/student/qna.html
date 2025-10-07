@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>שאלות ותשובות</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="navbar">
+    <a href="dashboard.html">דשבורד</a>
+    <a href="faults.html">תקלות נפוצות</a>
+    <a href="courses.html">לומדות</a>
+    <a href="qna.html">שאלות ותשובות</a>
+    <a href="../login.html" onclick="logout()">התנתק</a>
+</div>
+
+<div class="container">
+    <h2>שאלות ותשובות</h2>
+    <p>ממשק זה יכול להתחבר למחלקה המתאימה (ניתן להוסיף backend נוסף לניהול שאלות)</p>
+</div>
+
+<script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if(!user || user.role!=='student') window.location.href='../login.html';
+    function logout(){ localStorage.removeItem('user'); }
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ניהול לומדות / צפייה</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .container { max-width: 1000px; margin: auto; padding: 20px; }
+        .cards { display:flex; flex-wrap:wrap; gap:20px; margin-top:10px; }
+        .card { flex:1 1 250px; background:white; border-radius:15px; padding:15px; box-shadow:0 5px 20px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s; }
+        .card:hover { transform: translateY(-5px); box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+        .card img, .card video, .card iframe { width:100%; border-radius:10px; margin-top:10px; }
+        form { margin-bottom:20px; }
+        form input, form textarea, form select { width:100%; padding:8px; margin:5px 0; border-radius:8px; border:1px solid #ccc; }
+        form button { padding:10px 20px; border:none; border-radius:8px; background:#a5864f; color:white; cursor:pointer; }
+        form button:hover { background:#8b6f40; }
+        @media(max-width:768px){ .cards{ flex-direction: column; } }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="manage_courses.html">ניהול לומדות</a>
+    <a href="approve_faults.html">אישור תקלות</a>
+    <a href="../login.html" onclick="logout()">התנתק</a>
+</div>
+
+<div class="container">
+    <h2>ניהול לומדות</h2>
+    <p>ברוך הבא, <span id="username"></span></p>
+
+    <!-- בחירה בין שתי אפשרויות -->
+    <h3>הוספת לומדה חדשה</h3>
+    <form id="courseForm">
+        <label>בחר מחלקה:</label>
+        <select id="department" required>
+            <option value="tech_admin">טכנאים</option>
+            <option value="app_admin">אפליקציה</option>
+            <option value="call_admin">מוקד</option>
+            <option value="sys_admin">סיסטם</option>
+        </select>
+
+        <label>בחר סוג לומדה:</label>
+        <select id="courseType" required>
+            <option value="file">קובץ Word/PDF</option>
+            <option value="manual">לומדה ידנית עם מדיה</option>
+        </select>
+
+        <div id="fileUploadDiv">
+            <input type="file" id="courseFile" accept=".pdf,.doc,.docx">
+        </div>
+
+        <div id="manualDiv" style="display:none;">
+            <input type="text" id="courseTitle" placeholder="כותרת לומדה">
+            <textarea id="courseContent" placeholder="תוכן הלומדה"></textarea>
+            <input type="file" id="courseMedia" accept="image/*,video/*">
+        </div>
+
+        <button type="submit"><i class="fa fa-plus"></i> הוסף לומדה</button>
+    </form>
+
+    <h3>לומדות קיימות</h3>
+    <div class="cards" id="coursesCards"></div>
+</div>
+
+<script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if(!user || !user.role.includes('_admin')) window.location.href='../login.html';
+    document.getElementById('username').textContent = user.username;
+    function logout(){ localStorage.removeItem('user'); }
+
+    // --- שינוי בין סוגי לומדות ---
+    const courseTypeSelect = document.getElementById('courseType');
+    courseTypeSelect.addEventListener('change', ()=>{
+        const type = courseTypeSelect.value;
+        document.getElementById('fileUploadDiv').style.display = type==='file' ? 'block' : 'none';
+        document.getElementById('manualDiv').style.display = type==='manual' ? 'block' : 'none';
+    });
+
+    // --- שליחת לומדה חדשה ---
+    document.getElementById('courseForm').addEventListener('submit', async e=>{
+        e.preventDefault();
+        const department = document.getElementById('department').value;
+        const type = courseTypeSelect.value;
+
+        if(type==='file'){
+            const fileInput = document.getElementById('courseFile');
+            if(fileInput.files.length===0){ alert('בחר קובץ'); return; }
+            const formData = new FormData();
+            formData.append('title', fileInput.files[0].name);
+            formData.append('department', department);
+            formData.append('file', fileInput.files[0]);
+            await fetch('http://localhost:5000/courses/file', {
+                method:'POST',
+                body: formData
+            });
+        } else {
+            const title = document.getElementById('courseTitle').value;
+            const content = document.getElementById('courseContent').value;
+            const mediaInput = document.getElementById('courseMedia');
+            let mediaPath = '';
+            if(mediaInput.files.length>0){
+                const mediaForm = new FormData();
+                mediaForm.append('file', mediaInput.files[0]);
+                const res = await fetch('http://localhost:5000/courses/file', { method:'POST', body:mediaForm });
+                const data = await res.json();
+                mediaPath = data.file_url || '';
+            }
+            await fetch('http://localhost:5000/courses/manual', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({title,department,content,media:mediaPath})
+            });
+        }
+
+        document.getElementById('courseForm').reset();
+        fetchCourses();
+    });
+
+    // --- הצגת לומדות ---
+    async function fetchCourses(){
+        const res = await fetch('http://localhost:5000/courses/'+user.role.split('_')[0]+'_admin'); // מחלקה לפי admin
+        const data = await res.json();
+        const container = document.getElementById('coursesCards');
+        container.innerHTML='';
+        data.forEach(c=>{
+            const div = document.createElement('div');
+            div.className='card';
+            div.innerHTML = `<h4>${c.title}</h4>`;
+            if(c.file_url){
+                const ext = c.file_url.split('.').pop().toLowerCase();
+                if(['pdf'].includes(ext)){
+                    div.innerHTML+=`<iframe src="${c.file_url}" width="100%" height="400px"></iframe>`;
+                } else {
+                    div.innerHTML+=`<a href="${c.file_url}" target="_blank">פתח קובץ</a>`;
+                }
+            }
+            if(c.content) div.innerHTML+=`<p>${c.content}</p>`;
+            container.appendChild(div);
+        });
+    }
+    fetchCourses();
+</script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+/* ===============================
+   VARIABLES & BASE
+   =============================== */
+:root {
+    --primary-color: #a5864f;       /* זהב מטאלי */
+    --secondary-color: #001F3F;     /* כחול כהה */
+    --accent-color: #f5f5f5;        /* רקע בהיר */
+    --btn-color: #a5864f;
+    --btn-hover: #8b6d3d;
+    --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ===============================
+   GLOBAL STYLES
+   =============================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--accent-color);
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+/* ===============================
+   NAVBAR
+   =============================== */
+.navbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--secondary-color);
+    padding: 15px;
+    flex-wrap: wrap;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.navbar a:hover {
+    color: var(--primary-color);
+}
+
+/* ===============================
+   LOGIN PAGE
+   =============================== */
+.login-container {
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 40px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+    color: var(--secondary-color);
+}
+
+.login-container input {
+    display: block;
+    width: 100%;
+    margin: 15px 0;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.login-container input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.login-container button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    background-color: var(--btn-color);
+    color: white;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.login-container button:hover {
+    background-color: var(--btn-hover);
+}
+
+#error {
+    color: red;
+    margin-top: 10px;
+}
+
+/* ===============================
+   BUTTONS
+   =============================== */
+button {
+    background-color: var(--btn-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background-color: var(--btn-hover);
+}
+
+/* ===============================
+   LISTS & CARDS
+   =============================== */
+ul {
+    list-style: none;
+}
+
+li {
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #fafafa;
+    border-left: 5px solid var(--primary-color);
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+li a {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+/* ===============================
+   INPUTS & TEXTAREAS
+   =============================== */
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+/* ===============================
+   HEADINGS
+   =============================== */
+h2 {
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+}
+
+h3 {
+    color: var(--primary-color);
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* ===============================
+   TEXTAREAS
+   =============================== */
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+    }
+    .navbar a {
+        margin: 10px 0;
+    }
+    .container {
+        margin: 10px;
+        padding: 15px;
+    }
+}

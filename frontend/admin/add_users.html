@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>הוספת משתמשים – Admin</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    body { font-family: Arial, sans-serif; background:#f9f9f9; padding:20px; }
+    .navbar { background:#333; padding:10px; }
+    .navbar a { color:white; margin-left:15px; text-decoration:none; }
+    .container { max-width:500px; margin:20px auto; background:#fff; padding:20px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    h2 { color:#333; text-align:center; }
+    input, select, button { display:block; width:100%; margin:10px 0; padding:10px; border-radius:6px; border:1px solid #ccc; }
+    button { background:#a5864f; color:white; border:none; cursor:pointer; }
+    button:hover { background:#8b6f40; }
+    .message { margin-top:10px; text-align:center; font-weight:bold; }
+  </style>
+</head>
+<body>
+<div class="navbar">
+  <a href="dashboard.html">דשבורד</a>
+  <a href="courses.html">לומדות</a>
+  <a href="../login.html" onclick="logout()">התנתק</a>
+</div>
+
+<div class="container">
+  <h2>הוספת משתמש חדש</h2>
+  <input type="text" id="adminUsername" placeholder="שם משתמש אדמין">
+  <input type="text" id="newUsername" placeholder="שם משתמש חדש">
+  <input type="password" id="newPassword" placeholder="סיסמה">
+  <select id="newRole">
+    <option value="student">סטודנט</option>
+    <option value="tech_admin">טכנאי</option>
+    <option value="call_admin">מוקד</option>
+    <option value="app_admin">אפליקציה</option>
+    <option value="sys_admin">סיסטם</option>
+    <option value="student_admin">אדמין סטודנטים</option>
+  </select>
+  <button onclick="addUser()">הוסף משתמש</button>
+  <div class="message" id="msg"></div>
+</div>
+
+<script>
+  function logout() {
+    localStorage.removeItem('user');
+  }
+
+  async function addUser() {
+    const adminUsername = document.getElementById('adminUsername').value.trim();
+    const username = document.getElementById('newUsername').value.trim();
+    const password = document.getElementById('newPassword').value;
+    const role = document.getElementById('newRole').value;
+
+    if (!adminUsername || !username || !password || !role) {
+      document.getElementById('msg').textContent = 'אנא מלא את כל השדות';
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:5000/users/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminUsername, username, password, role })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('msg').textContent = `המשתמש ${data.username} נוסף בהצלחה!`;
+        document.getElementById('newUsername').value = '';
+        document.getElementById('newPassword').value = '';
+      } else {
+        document.getElementById('msg').textContent = data.error || 'שגיאה בהוספת המשתמש';
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById('msg').textContent = 'שגיאה בשרת';
+    }
+  }
+</script>
+</body>
+</html>

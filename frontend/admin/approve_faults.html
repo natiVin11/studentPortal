@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ניהול לומדות – Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .form-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 10px; }
+        .form-section h3 { margin-top: 0; }
+        input, textarea, select, button { display: block; width: 100%; margin: 5px 0; padding: 8px; border-radius: 6px; }
+        button { background-color: #a5864f; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #8b6f40; }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <a href="manage_courses.html">ניהול לומדות</a>
+    <a href="approve_faults.html">אישור תקלות</a>
+    <a href="../login.html" onclick="logout()">התנתק</a>
+</div>
+
+<div class="container">
+    <h2>ניהול לומדות</h2>
+
+    <p>בחר סוג העלאה:</p>
+    <label><input type="radio" name="uploadType" value="file" checked> העלאת קובץ Word/PDF</label>
+    <label><input type="radio" name="uploadType" value="manual"> הזנת לומדה ידנית (עם תמונה/סרטון)</label>
+
+    <!-- העלאת קובץ -->
+    <div id="fileUpload" class="form-section">
+        <h3>העלאת קובץ</h3>
+        <input type="text" id="fileTitle" placeholder="כותרת הלומדה" required>
+        <select id="fileDepartment">
+            <option value="tech_admin">טכנאים</option>
+            <option value="app_admin">אפליקציה</option>
+            <option value="call_admin">מוקד</option>
+            <option value="sys_admin">סיסטם</option>
+        </select>
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx" required>
+        <button onclick="uploadFile()">העלה לומדה</button>
+    </div>
+
+    <!-- הזנת לומדה ידנית -->
+    <div id="manualUpload" class="form-section" style="display:none;">
+        <h3>לומדה ידנית</h3>
+        <input type="text" id="manualTitle" placeholder="כותרת הלומדה" required>
+        <select id="manualDepartment">
+            <option value="tech_admin">טכנאים</option>
+            <option value="app_admin">אפליקציה</option>
+            <option value="call_admin">מוקד</option>
+            <option value="sys_admin">סיסטם</option>
+        </select>
+        <textarea id="manualContent" placeholder="תוכן הלומדה" rows="5" required></textarea>
+        <input type="file" id="manualFile" accept="image/*,video/*">
+        <button onclick="uploadManual()">הוסף לומדה</button>
+    </div>
+</div>
+
+<script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if(!user || !user.role.includes('_admin')) window.location.href='../login.html';
+    function logout(){ localStorage.removeItem('user'); }
+
+    // הצגת/הסתרת טפסים לפי סוג העלאה
+    document.querySelectorAll('input[name="uploadType"]').forEach(radio=>{
+        radio.addEventListener('change', e=>{
+            if(e.target.value === 'file'){
+                document.getElementById('fileUpload').style.display='block';
+                document.getElementById('manualUpload').style.display='none';
+            } else {
+                document.getElementById('fileUpload').style.display='none';
+                document.getElementById('manualUpload').style.display='block';
+            }
+        });
+    });
+
+    // העלאת קובץ Word/PDF
+    async function uploadFile(){
+        const title = document.getElementById('fileTitle').value;
+        const department = document.getElementById('fileDepartment').value;
+        const file = document.getElementById('fileInput').files[0];
+        if(!title || !department || !file) return alert('יש למלא את כל השדות');
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('department', department);
+        formData.append('file', file);
+
+        const res = await fetch('http://localhost:5000/courses/file', {
+            method:'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if(data.success) alert('לומדה הועלתה בהצלחה!');
+        else alert('שגיאה בהעלאה');
+    }
+
+    // הזנת לומדה ידנית
+    async function uploadManual(){
+        const title = document.getElementById('manualTitle').value;
+        const department = document.getElementById('manualDepartment').value;
+        const content = document.getElementById('manualContent').value;
+        const file = document.getElementById('manualFile').files[0];
+
+        if(!title || !department || !content) return alert('יש למלא את כל השדות');
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('department', department);
+        formData.append('content', content);
+        if(file) formData.append('file', file);
+
+        const res = await fetch('http://localhost:5000/courses/manual', {
+            method:'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if(data.success) alert('לומדה ידנית נוספה בהצלחה!');
+        else alert('שגיאה');
+    }
+</script>
+</body>
+</html>
